@@ -1,0 +1,28 @@
+表备注和字段备注需要齐全
+	表备注格式:
+		0代表无附件,1代表有附件
+		例:	1:测试表
+	字段备注格式:
+		若需要关联字典表,则需要如下格式,dict为固定,affiche_type为字典表的type值,公告类型为该字典的类型注释
+		例:	dict:affiche_type:公告类型
+		若不需要关联,则直接写备注即可
+
+建表需要有以下公共字段:
+	id,
+    org_id,
+    org_name,
+    create_by,
+    create_by_name,
+    create_date,
+    update_by,
+    update_by_name,
+    update_date,
+    remarks,
+    del_flag,
+    extend_one,
+    extend_two,
+    extend_three
+
+需要在generator.properties文件中修改:
+	moduleName:	(模块名称,需要用unicode码,例:\u8d39\u7528\u7ba1\u7406)
+	orgPackage:	(机构文件夹名称,例:jinnanyey)

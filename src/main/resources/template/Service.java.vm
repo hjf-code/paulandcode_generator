@@ -1,0 +1,50 @@
+package ${package}.service;
+
+import java.util.List;
+
+import ${package}.entity.${className}Entity;
+import ${package}.utils.Query;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+public interface ${className}Service {
+	/**
+	 * 根据主键查询单个
+	 */
+	${className}Entity queryObject(${pk.attrType} ${pk.attrname});
+
+	/**
+	 * 查询列表
+	 */
+	List<${className}Entity> queryList(Query query);
+
+	/**
+	 * 查询总数
+	 */
+	int queryTotal(Query query);
+
+	/**
+	 * 保存
+	 */
+	void save(${className}Entity ${classname});
+
+	/**
+	 * 更新
+	 */
+	void update(${className}Entity ${classname});
+
+	/**
+	 * 单个删除
+	 */
+	void delete(Query query);
+
+	/**
+	 * 批量删除
+	 */
+	void deleteBatch(Query query);
+}

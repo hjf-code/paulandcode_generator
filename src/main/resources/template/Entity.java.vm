@@ -1,0 +1,110 @@
+package ${package}.entity;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import com.alibaba.fastjson.annotation.JSONField;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+public class ${className}Entity implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+#foreach ($column in $columns)
+#if($column.dictType == '')
+	/**
+	 * ${column.comments}
+	 */
+	private ${column.attrType} ${column.attrname};
+#end
+#if($column.dictType != '')
+	/**
+	 * ${column.comments},所关联字典表的id,字典类型为:${column.dictType}
+	 */
+	private ${column.attrType} ${column.attrname};
+	/**
+	 * ${column.comments}名称,所关联字典表的标签名,用于页面显示,字典类型为:${column.dictType}
+	 */
+	private String ${column.attrname}Name;
+#end
+#end
+#if($hasFiles == '1')
+
+	/**
+	 * 附件组id
+	 */
+	private String fileGroupId;
+	/**
+	 * 附件id数组json字符串,例:["123","321"]
+	 */
+	private String fileIds;
+	
+	/**
+	 * 设置：附件组id
+	 */
+	public void setFileGroupId(String fileGroupId) {
+		this.fileGroupId = fileGroupId;
+	}
+
+	/**
+	 * 获取：附件组id
+	 */
+	public String getFileGroupId() {
+		return fileGroupId;
+	}
+	
+	/**
+	 * 设置：附件id数组json字符串
+	 */
+	public void setFileIds(String fileIds) {
+		this.fileIds = fileIds;
+	}
+
+	/**
+	 * 获取：附件id数组json字符串
+	 */
+	public String getFileIds() {
+		return fileIds;
+	}
+#end
+#foreach ($column in $columns)
+
+	/**
+	 * 设置：${column.comments}
+	 */
+	public void set${column.attrName}(${column.attrType} ${column.attrname}) {
+		this.$column.attrname = $column.attrname;
+	}
+
+	/**
+	 * 获取：${column.comments}
+	 */
+#if($column.attrType == 'Date')
+    @JSONField(format = "yyyy-MM-dd")
+#end
+	public $column.attrType get${column.attrName}() {
+		return $column.attrname;
+	}
+#if($column.dictType != '')
+
+	/**
+	 * 设置：${column.comments}名称
+	 */
+	public void set${column.attrName}Name(String ${column.attrname}Name) {
+		this.${column.attrname}Name = ${column.attrname}Name;
+	}
+
+	/**
+	 * 获取：${column.comments}名称
+	 */
+	public String get${column.attrName}Name() {
+		return ${column.attrname}Name;
+	}
+#end
+#end
+}

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${package}.dao.${className}Dao">
+    <resultMap type="${package}.entity.${className}Entity" id="${classname}Map">
+#foreach($column in $columns)
+        <result property="${column.attrname}" column="${column.columnName}"/>
+#end
+    </resultMap>
+
+    <sql id="${className}Columns">
+#foreach($column in $columns)
+        ${column.columnName}#if($foreach.hasNext),#end
+
+#end
+    </sql>
+
+    <select id="queryObject" resultType="${package}.entity.${className}Entity">
+        SELECT
+            <include refid="${className}Columns"/>
+        FROM
+            ${tableName}
+        WHERE
+            ${pk.columnName} = #{${pk.columnName}}
+    </select>
+
+    <select id="queryList" resultType="${package}.entity.${className}Entity">
+        SELECT
+            <include refid="${className}Columns"/>
+        FROM
+            ${tableName}
+        WHERE
+        	del_flag = '0'
+                AND
+            org_id = #{orgId}
+        ORDER BY
+        	create_date DESC
+        <if test="offset != null and limit != null">
+            LIMIT #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        SELECT
+        	count(t.${pk.columnName})
+    	FROM
+        	(SELECT
+	            ${pk.columnName}
+	        FROM
+	            ${tableName}
+	        WHERE
+	        	del_flag = '0'
+                    AND
+                org_id = #{orgId}) t
+    </select>
+
+    <insert id="save" parameterType="${package}.entity.${className}Entity"#if($pk.extra == 'auto_increment') useGeneratedKeys="true" keyProperty="$pk.attrname"#end>
+        INSERT INTO
+            ${tableName}
+        (
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+            ${column.columnName}#if($velocityCount != $columns.size()), #end
+
+#end
+#end
+        )
+        VALUES
+        (
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+            #{$column.attrname}#if($velocityCount != $columns.size()), #end
+
+#end            
+#end
+        )
+    </insert>
+
+    <update id="update" parameterType="${package}.entity.${className}Entity">
+        UPDATE
+        	${tableName}
+        <set>
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName)
+            <if test="$column.attrname != null">$column.columnName = #{$column.attrname}#if($velocityCount != $columns.size()), #end</if>
+#end
+#end
+        </set>
+        WHERE
+        	${pk.columnName} = #{${pk.attrname}}
+    </update>
+
+    <update id="delete" parameterType="map">
+        UPDATE
+            ${tableName}
+        SET
+            del_flag = '1',
+            update_date = #{updateDate},
+            update_by = #{updateBy},
+            update_by_name = #{updateByName}
+        WHERE
+            ${pk.columnName} = #{${pk.columnName}}
+    </update>
+
+	<update id="deleteBatch" parameterType="map">
+        UPDATE
+            ${tableName}
+        SET
+            del_flag = '1',
+            update_date = #{updateDate},
+            update_by = #{updateBy},
+            update_by_name = #{updateByName}
+        WHERE ${pk.columnName} IN
+        <foreach item="${pk.attrname}" collection="${pk.attrname}s" open="(" separator="," close=")">
+            #{${pk.attrname}}
+        </foreach>
+    </update>
+</mapper>

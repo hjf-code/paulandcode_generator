@@ -1,0 +1,80 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>增加${comments}记录</title>
+    <link rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../statics/awesome/css/font-awesome.css"/>
+    <link id="iframeSkinShared" rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/shared.css"/>
+    <link id="iframeSkinGui" rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/gui.css"/>
+    <link rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/reset.css"/>
+    <link rel="stylesheet" href="../statics/css/${orgPackage}/jedate.css">
+    <link rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/wangEditor.min.css">
+    <link rel="stylesheet" href="../statics/css/${orgPackage}/layer.css"> 
+</head>
+<body>
+<div class="subCrumbs">
+	<i class="fa fa-home fa-fw"></i>当前位置: <span>${moduleName}</span>/<span>增加${comments}记录</span>
+</div>
+<div class="p30">
+	<div class="announCreate viewFramework-product">
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName && $column.columnName != 'org_id' && $column.columnName != 'org_name' && $column.columnName != 'create_by' && $column.columnName != 'create_by_name' && $column.columnName != 'create_date' && $column.columnName != 'update_by' && $column.columnName != 'update_by_name' && $column.columnName != 'update_date' && $column.columnName != 'remarks' && $column.columnName != 'del_flag' && $column.columnName != 'extend_one' && $column.columnName != 'extend_two' && $column.columnName != 'extend_three')
+#if($column.attrType != 'Date')
+	    <div class="gui-form-item gui-form-item-required">
+	    	<label class="gui-form-item-label width130" >$column.comments：</label>
+			<div class="gui-form-item-content">
+#if($column.dictType != '')
+				<select class="gui-select valid" aria-invalid="false">
+	           	    <optgroup label="$column.comments" id="$column.attrname"></optgroup>
+            	</select>
+#end
+#if($column.dictType == '')
+				<div class="gui-input-wrapper gui-input-type">
+		        	<input id="$column.attrname" maxlength="50" type="text" name="$column.attrname" placeholder="请输入$column.comments" class="gui-input">
+		    	</div>
+#end
+			</div>
+		</div>
+#end
+#if($column.attrType == 'Date')
+		<div class="gui-form-item gui-form-item-required">
+		     <div class="datep">
+				<div class="gui-form-item mb10" style="margin-bottom:10px;">
+					<label class="gui-form-item-label width130" >$column.comments：</label>
+		    		<input class="datainp wicon" id="$column.attrname" type="text" placeholder="请选择$column.comments" value="" readonly>
+				</div>
+			</div>
+		</div>
+#end
+#end
+#end
+#if($hasFiles == '1')
+		<div class="gui-form-item">
+			<label class="gui-form-item-label width130">附件：</label>
+			<div id="uploadfile" style="clear: both; margin-left: 130px">
+			</div>
+			<div style="padding-left: 130px;">
+				<iframe id='fileIframe' name="fileUpload" frameborder="0" width="100%" src="newFileUpload.html"></iframe>
+			</div>
+		</div>
+#end
+		<div class="gui-form-item paddingLeft60 pull-right">
+			<div class="gui-btn gui-btn-normal" id='onSubmit'><i class="fa fa-newspaper-o"></i><span>提交</span></div>
+			<div class="gui-btn gui-btn-primary btn-close" id="onClose"><i class="fa fa-close"></i><span>关闭</span></div>
+		</div>
+	</div>
+</div>
+<script src="../js/${orgPackage}/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="../js/public.js" ></script>
+<script type="text/javascript" src="../js/${orgPackage}/honeyswitch.js"></script>
+<script type="text/javascript" src="../js/${orgPackage}/jquery.jedate.js"></script>
+<script type="text/javascript" src="../js/${orgPackage}/jquery-validate.js"></script>
+<script src="../js/${orgPackage}/bootstrap.js" type="text/javascript" ></script>
+<script src="../js/${orgPackage}/selectPer.js" type="text/javascript" ></script>
+<script type="text/javascript" src="../js/${orgPackage}/commonAlert.js" ></script>
+#if($hasFiles == '1')
+<script type="text/javascript" src="../js/${orgPackage}/commonRendFileOne.js"></script>
+#end
+<script src='../js/${orgPackage}/${classname}Create.js'></script>
+</body>
+</html>

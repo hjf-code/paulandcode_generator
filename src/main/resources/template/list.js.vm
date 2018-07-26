@@ -1,0 +1,90 @@
+//接受服务器数据的变量
+var data="";
+
+//窗体初始化
+window.onload = function(){
+    //为分页页码统一添加单击事件
+	pageButtonClick(getNewData);
+	//初始化页面
+    getNewData(1,"10");
+}  
+
+//ajax获取服务器数据
+function getNewData(num,size){
+	$.ajax({
+	       type: "POST",
+	       url: contextPath+"${pathName}/list",
+	       dataType: "json",
+	       data: {'page':num,'limit':size},
+           success: function(msg){
+        	   if(msg.code==1){
+        	   	   //生成分页
+        		   runCommonPage(msg,size);	
+        		   data=msg;
+                   appendAll();
+                   heightScroll();
+        	   }
+        	   else{
+        		   alert(msg.msg);
+        	   }
+           }
+        });
+}
+
+function appendAll(){
+	$('#annoTbody').children().remove();
+	/*--列表--*/
+	$(data.page.list).each(function(index, e){
+		var className=((index+1)%2)?"odd":"none";
+		$('#annoTbody').append('<tr name='+e.${pk.attrname}+' class='+className+'>'+
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName && $column.columnName != 'org_id' && $column.columnName != 'org_name' && $column.columnName != 'create_by' && $column.columnName != 'create_by_name' && $column.columnName != 'create_date' && $column.columnName != 'update_by' && $column.columnName != 'update_by_name' && $column.columnName != 'update_date' && $column.columnName != 'remarks' && $column.columnName != 'del_flag' && $column.columnName != 'extend_one' && $column.columnName != 'extend_two' && $column.columnName != 'extend_three')
+#if($column.dictType != '')
+							   '<td>'+e.${column.attrname}Name+'</td>'+
+#end
+#if($column.dictType == '')
+							   '<td>'+e.${column.attrname}+'</td>'+
+#end
+#end
+#end
+							   '<td><a class="update">修改</a>&nbsp;&nbsp;&nbsp;&nbsp;<a class="delete">删除</a></td></tr>')
+	})
+
+	//删除
+	$('.delete').click(function(){
+		var reqId = $(this).parent().parent().attr("name");
+		window.confirm('你确定要删除吗？', function(flag){
+		    if (flag) {
+		    	$.ajax({
+		 		   type: "GET",
+		 		   url: contextPath+"${pathName}/delete",
+		 		   dataType: "json",
+		 		   data: {'${pk.attrname}': reqId},
+		 		   success: function(msg){
+		 			   if(msg.code==1){
+		 				   if(data.page.currPage>1&&data.page.totalCount%data.page.pageSize==1){
+		 					   getNewData(data.page.currPage-1,$('#commonPage select>option:selected').val())
+		 				   }
+		 				   else{
+		 					   getNewData(data.page.currPage,$('#commonPage select>option:selected').val())
+		 				   }
+		 			   }
+		 		   }
+		 		});
+		    } else {
+		    }
+		});
+	})
+	
+	// 修改
+	$('.update').click(function(){
+		localStorage.setItem("${pk.attrname}", $(this).parent().parent().attr("name"));
+		window.location.href='${classname}Create.html';
+	})
+}
+
+// 增加
+$('#sendCreate').click(function(){
+	localStorage.setItem("${pk.attrname}", "");
+	window.location.href='${classname}Create.html'
+});

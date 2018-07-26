@@ -1,0 +1,207 @@
+// 防止多次提交
+var ${pk.attrname} = "";
+
+#if($hasFiles == '1')
+// 单个文件对象
+var oneFileObj = '';
+// 原groupId
+var fileGroupOriId = '';
+// 文件对象
+var filesObj = {
+	'fileGroupId' : '',
+	'list' : ''
+};
+// 接收附件对象
+function getFiles(files) {
+	filesObj.fileGroupId = files.groupId;
+	filesObj.list = files.ids == "" ? "" : '["' + files.ids + '"]';
+}
+// 选择文件
+var fatherData = {
+	"moduleId" : "common"
+}
+document.getElementById("fileIframe").onload = function() {
+	document.getElementById("fileIframe").contentWindow.runUploader(fatherData);
+}
+
+#end
+// 窗体初始化
+window.onload = function() {
+#if($needDict)
+#foreach($column in $columns)
+#if($column.dictType != '')
+	$.ajax({
+	    type: "GET",
+        url: contextPath + "sysdict/myList",
+	    dataType: "json",
+	    data: {"type": "${column.dictType}"},
+	    success: function(data) {
+     	    if (data.code == 1) {
+     		    $('#${column.attrname}').empty();
+     			$(data.page.list).each(function(index, e) {
+     				$('#${column.attrname}').append('<option id=' + e.id + '>' + e.label + '</option>');
+     			})
+     	    } else {
+     		    alert(data.msg);
+     	    }
+	    }
+	});
+
+#end
+#end
+#end
+	${pk.attrname} = localStorage.getItem("${pk.attrname}");
+	// 若为修改则页面回显
+	if (${pk.attrname}) {
+		$.ajax({
+		    type: "GET",
+	        url: contextPath + "${pathName}/info",
+	        dataType: "json",
+	        data: {'${pk.attrname}': ${pk.attrname}},
+            success: function(data) {
+        	    if (data.code == 1) {
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName && $column.columnName != 'org_id' && $column.columnName != 'org_name' && $column.columnName != 'create_by' && $column.columnName != 'create_by_name' && $column.columnName != 'create_date' && $column.columnName != 'update_by' && $column.columnName != 'update_by_name' && $column.columnName != 'update_date' && $column.columnName != 'remarks' && $column.columnName != 'del_flag' && $column.columnName != 'extend_one' && $column.columnName != 'extend_two' && $column.columnName != 'extend_three')
+#if($column.dictType != '')
+        			$('#' + data.${classname}.${column.attrname}).attr('selected', "true");
+#end
+#if($column.dictType == '')
+        			$('#$column.attrname').val(data.${classname}.$column.attrname);
+#end
+#end
+#end
+#if($hasFiles == '1')
+
+					// 附件
+					var fileData = {
+						"fileList": data.files,
+						"container": "#uploadfile",
+						"preview": "0", // 可以预览 0不可以
+						"download": "0", // 可以下载 0不可以
+						"saveAs": "0" // 可以转存 0不可以
+					}
+					commonRendfile(fileData);
+					goUpload();
+					// 选择文件
+					function goUpload() {
+						var reqLength = 0;
+						try {
+						    reqLength = data.files.length;
+					    } catch(err) {
+					    }
+						fatherData = {
+							"moduleId": "common",
+							"fileNum":data.files.length,
+							"groupId": data.${classname}.fileGroupId,
+							"yeWuId": data.${classname}.id
+						}
+						try {
+							setTimeout(function() {
+								document.getElementById("fileIframe").contentWindow.runUploader(fatherData);
+							},2000)
+					    } catch(err) {
+					    	setTimeout(function(){
+					    		goUpload();
+							},400)
+					    }
+					}
+#end
+        	    } else {
+        		    alert(data.msg);
+        	    }
+            }
+        });
+	}
+}  
+
+// 日期控件
+$('.datainp').jeDate({format: 'YYYY-MM-DD'});
+	
+// 发送数据的ajax
+function sendReq(goUrl) {
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName && $column.columnName != 'org_id' && $column.columnName != 'org_name' && $column.columnName != 'create_by' && $column.columnName != 'create_by_name' && $column.columnName != 'create_date' && $column.columnName != 'update_by' && $column.columnName != 'update_by_name' && $column.columnName != 'update_date' && $column.columnName != 'remarks' && $column.columnName != 'del_flag' && $column.columnName != 'extend_one' && $column.columnName != 'extend_two' && $column.columnName != 'extend_three')
+#if($column.dictType == '')
+#if($column.attrType != 'Date')
+	if ($('#$column.attrname').val() == "") {
+		inputError('#$column.attrname');
+		alert("请填写$column.comments");
+		return;
+	}
+
+#end
+#if($column.attrType == 'Date')
+	if ($('#$column.attrname').val() == "") {
+		inputError('#$column.attrname');
+		alert("请选择$column.comments");
+		return;
+	}
+
+#end
+#end
+#end
+#end
+#if($hasFiles == '1')
+	// 选择附件
+	if (fileGroupOriId != '') {
+		var fileGroupId = fileGroupOriId; // 附件回传文件组id
+	} else {
+		var fileGroupId = filesObj.fileGroupId; // 附件回传文件组id
+	}
+	var fileList = filesObj.list;
+
+#end
+	var ${classname} = JSON.stringify({
+#if($hasFiles == '1')
+		"fileGroupId": fileGroupId, // 附件
+		"fileIds": fileList, // 附件数组
+#end
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName && $column.columnName != 'org_id' && $column.columnName != 'org_name' && $column.columnName != 'create_by' && $column.columnName != 'create_by_name' && $column.columnName != 'create_date' && $column.columnName != 'update_by' && $column.columnName != 'update_by_name' && $column.columnName != 'update_date' && $column.columnName != 'remarks' && $column.columnName != 'del_flag' && $column.columnName != 'extend_one' && $column.columnName != 'extend_two' && $column.columnName != 'extend_three')
+#if($column.dictType == '')
+		"$column.attrname": $('#$column.attrname').val(),
+#end
+#if($column.dictType != '')
+		"$column.attrname": $('#${column.attrname} option:selected').attr('id'),
+#end
+#end
+#end
+		"${pk.attrname}": ${pk.attrname}
+	});
+	
+	$.ajax({
+		type: "POST",
+		url: contextPath + "${pathName}/save",
+		dataType: 'json',
+		data : {
+			"${classname}": ${classname}
+		},
+		success: function(data) {
+			${pk.attrname} = data.${pk.attrname};
+			if (goUrl != '') {
+				if (data.code == "1") {
+					window.location.href = goUrl;
+				} else {
+					alert(data.msg);
+				}
+			} else {
+				if (data.code == "1") {
+					alert("保存成功!");
+				}
+				if (data.code == "0") {
+					alert(data.msg);
+				}
+			}
+		}
+	});
+}
+
+// 提交
+$('#onSubmit').click(function() {
+	sendReq('${classname}.html');
+})
+
+//关闭
+$("#onClose").click(function() {
+	window.history.go(-1);
+})

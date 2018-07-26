@@ -1,0 +1,181 @@
+package ${package}.controller;
+
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.fastjson.JSON;
+#if($hasFiles == '1')
+import ${package}.service.SysFileService;
+import ${package}.entity.SysFileItemEntity;
+import ${package}.service.SysFileItemService;
+#end
+#if($needDict)
+import ${package}.service.SysDictService;
+#end
+import ${package}.entity.${className}Entity;
+import ${package}.service.${className}Service;
+import ${package}.utils.BaseDataUtils;
+import ${package}.utils.IDUtils;
+import ${package}.utils.PageUtils;
+import ${package}.utils.Query;
+import ${package}.utils.R;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+@RestController
+@RequestMapping("${pathName}")
+public class ${className}Controller {
+	@Autowired
+	private ${className}Service ${classname}Service;
+#if($hasFiles == '1')
+	@Autowired
+	private SysFileService sysFileService;
+	@Autowired
+	private SysFileItemService sysFileItemService;
+#end
+#if($needDict)
+	@Autowired
+	private SysDictService sysDictService; 
+#end
+
+	/**
+	 * 列表
+	 */
+	@RequestMapping("/list")
+    // @RequiresPermissions("${pathName}:list")
+	public R list(@RequestParam Map<String, Object> params) {
+		String orgId = BaseDataUtils.getOrgId();
+		// 查询列表数据
+        Query query = new Query(params);
+        query.put("orgId", orgId);
+		List<${className}Entity> ${classname}List = ${classname}Service.queryList(query);
+#if($needDict)
+		for (${className}Entity ${classname} : ${classname}List) {
+#foreach ($column in $columns)
+#if($column.dictType != '')
+			${classname}.set${column.attrName}Name(sysDictService.queryObject(${classname}.get${column.attrName}()).getLabel());
+#end
+#end
+		}
+#end
+		int total = ${classname}Service.queryTotal(query);
+		PageUtils pageUtil = new PageUtils(${classname}List, total, query.getLimit(), query.getPage());
+		return R.ok().put("page", pageUtil);
+	}
+
+	/**
+	 * 信息
+	 */
+	@RequestMapping("/info")
+    // @RequiresPermissions("${pathName}:info")
+	public R info(${pk.attrType} ${pk.attrname}) {
+		${className}Entity ${classname} = ${classname}Service.queryObject(${pk.attrname});
+#if($hasFiles == '0')
+		return R.ok().put("${classname}", ${classname});
+#end
+#if($hasFiles == '1')
+		// 数据库中查到的附件集合,统一模块名为common
+		List<SysFileItemEntity> fileLists = sysFileItemService.getFileList("common", ${pk.attrname});
+		// 用于回显的附件集合
+		List<Map<String, String>> files = new ArrayList<Map<String, String>>();
+		// 若无附件,则fileGroupId为空字符串
+		if (null != fileLists) {
+			if (fileLists.size() > 0) {
+				for (SysFileItemEntity file: fileLists) {
+					Map<String, String> center = new HashMap<String, String>(5);
+					center.put("id", file.getId());
+					center.put("fileName", file.getFileName());
+					center.put("extend1", file.getExtend1());
+					center.put("extend2", file.getExtend2());
+					if (file.getUpdateDate() != null) {
+						center.put("filePublishDate", new SimpleDateFormat("yyyy-MM-dd HH:mm").format(file.getUpdateDate()));
+					} else {
+						center.put("filePublishDate", "");
+					}
+					files.add(center);
+				}
+				${classname}.setFileGroupId(fileLists.get(0).getFileGroupId());
+			} else {
+				${classname}.setFileGroupId("");
+			}
+		} else {
+			${classname}.setFileGroupId("");
+		}
+		if (files.size() > 0) {
+			return R.ok().put("${classname}", ${classname}).put("files", files);
+		} else {
+			// 若无附件,则为空字符串
+			return R.ok().put("${classname}", ${classname}).put("files", "");
+		}
+#end
+	}
+
+	/**
+	 * 保存/修改
+	 */
+	@RequestMapping("/save")
+    // @RequiresPermissions("${pathName}:save")
+	public R save(HttpServletRequest request) {
+		${className}Entity ${classname} = JSON
+				.parseObject(request.getParameter("${classname}").toString(), ${className}Entity.class);
+
+		${classname}.setUpdateBy(BaseDataUtils.getUserId());
+		${classname}.setUpdateByName(BaseDataUtils.getUserName());
+		${classname}.setUpdateDate(new Date());
+
+		String id = ${classname}.getId();
+		if ("".equals(id)) {
+			id = IDUtils.getId();
+			${classname}.setId(id);
+			${classname}.setOrgId(BaseDataUtils.getOrgId());
+			${classname}.setOrgName(BaseDataUtils.getOrg_name_s_cn());
+			${classname}.setCreateBy(BaseDataUtils.getUserId());
+			${classname}.setCreateByName(BaseDataUtils.getUserName());
+			${classname}.setCreateDate(new Date());
+			${classname}.setRemarks("");
+			${classname}.setDelFlag("0");
+			${classname}Service.save(${classname});
+		} else {
+			${classname}Service.update(${classname});
+		}
+
+#if($hasFiles == '1')
+		// 将附件和附件组与业务绑定
+		sysFileService.connectFileAndFileGroupWithBusiness(${classname}.getFileIds(),
+				${classname}.getFileGroupId(), id);
+
+#end
+		return R.ok().put("id", id);
+	}
+
+	/**
+	 * 删除
+	 */
+	@RequestMapping("/delete")
+    // @RequiresPermissions("${pathName}:delete")
+	public R delete(${pk.attrType} ${pk.attrname}) {
+		Query query = new Query();
+		query.put("${pk.attrname}", ${pk.attrname});
+		query.put("updateDate", new Date());
+		query.put("updateBy", BaseDataUtils.getUserId());
+		query.put("updateByName", BaseDataUtils.getOrg_name_s_cn());
+		${classname}Service.delete(query);
+		return R.ok();
+	}
+}

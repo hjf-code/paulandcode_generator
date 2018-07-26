@@ -1,0 +1,52 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>${comments}列表</title>
+    <link rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../statics/awesome/css/font-awesome.css"/>
+    <link id="iframeSkinShared" rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/shared.css"/>
+    <link id="iframeSkinGui" rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/gui.css"/>
+    <link rel="stylesheet" type="text/css" href="../statics/css/${orgPackage}/reset.css"/>
+</head>
+<body>
+<div class="subCrumbs">
+	<i class="fa fa-home fa-fw"></i> 当前位置: <span>${moduleName}</span>/<span>${comments}列表</span>
+</div>
+<div class="p30">
+    <div class="toptool" id="navHeight">
+    	<div class="create">
+			<div class="gui-btn gui-btn-normal btn-new" id="sendCreate">
+				<i class="fa fa-plus-square-o"></i><span>增加${comments}记录</span>
+			</div>
+		</div>
+	</div>
+    <div class="">
+    	<div class="data-tool">
+			<div style="font-size: 16px;text-align: center;font-weight: bold;">${comments}列表</div>
+        </div>
+        <table cellspacing="1" cellpadding="0" class="tablesorter-blue" border="0">
+            <thead>
+                <tr>
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName && $column.columnName != 'org_id' && $column.columnName != 'org_name' && $column.columnName != 'create_by' && $column.columnName != 'create_by_name' && $column.columnName != 'create_date' && $column.columnName != 'update_by' && $column.columnName != 'update_by_name' && $column.columnName != 'update_date' && $column.columnName != 'remarks' && $column.columnName != 'del_flag' && $column.columnName != 'extend_one' && $column.columnName != 'extend_two' && $column.columnName != 'extend_three')
+    				<th>${column.comments}</th>
+#end
+#end
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id='annoTbody'></tbody>
+        </table>
+    </div>
+    <div class="page-box" >
+    	<ul class="gui-page" id="commonPage"></ul>
+    </div>
+</div>
+<script src="../js/${orgPackage}/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="../js/public.js" ></script>
+<script src="../js/${orgPackage}/bootstrap.js" type="text/javascript" charset="utf-8"></script>
+<script src="../js/${orgPackage}/commonPage.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="../js/${orgPackage}/commonAlert.js" ></script>
+<script src="../js/${orgPackage}/${classname}.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>
